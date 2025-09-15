@@ -1,12 +1,31 @@
-# docker-todo/backend/Dockerfile
-FROM node:18-alpine
+version: '3.8'
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
 
-WORKDIR /app
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASS=root
+      - DB_NAME=todo_db
+    depends_on:
+      - db
 
-COPY package*.json ./
-RUN npm install
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: todo_db
+    volumes:
+      - db_data:/var/lib/mysql
 
-COPY . .
-
-EXPOSE 5000
-CMD ["npm", "start"]
+volumes:
+  db_data:
